@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BKCバス 発車カウントダウン</title>
+<style>
+:root{--bg:#f6f3f1;--surface:#fff;--ink:#241a1a;--sub:#6e6262;--line:#e2d9d6;--accent:#9d1717;--on-accent:#fff;--warn:#c2410c;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171212;--surface:#241c1c;--ink:#f3eceb;--sub:#a89b99;--line:#3a2f2f;--accent:#e0524f;--on-accent:#1a0d0d;--warn:#fb923c}}
+:root[data-theme="dark"]{--bg:#171212;--surface:#241c1c;--ink:#f3eceb;--sub:#a89b99;--line:#3a2f2f;--accent:#e0524f;--on-accent:#1a0d0d;--warn:#fb923c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;line-height:1.5}
+main{max-width:480px;margin:0 auto;padding:16px}
+.notice{font-size:13px;color:var(--sub);border-left:3px solid var(--warn);padding:2px 0 2px 10px;margin:0 0 16px}
+.seg{display:flex;gap:6px;margin-bottom:12px}
+.seg button{flex:1;padding:12px 8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;font:inherit;font-size:15px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.seg.small button{padding:8px;font-size:13px}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 20px;margin:16px 0;text-align:center}
+.hero .lead{font-size:14px;color:var(--sub);margin:0}
+.big{font-size:88px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;color:var(--accent);margin:6px 0 0}
+.big small{font-size:32px;font-weight:700;margin-left:4px}
+.hero.urgent .big{color:var(--warn)}
+.secs{font-size:20px;font-variant-numeric:tabular-nums;color:var(--sub);margin:0}
+.dep{font-size:17px;font-weight:700;margin:12px 0 0}
+h2{font-size:14px;font-weight:700;color:var(--sub);margin:20px 0 8px}
+ul{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+li{display:flex;justify-content:space-between;padding:12px 16px;font-variant-numeric:tabular-nums}
+li+li{border-top:1px solid var(--line)}
+li span:last-child{color:var(--sub)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+:root{--bg:#eaeef0;--surface:#f5f7f8;--ink:#13232b;--sub:#5a6d75;--line:#c3ccd0;--accent:#0d5c6e;--on-accent:#fff;--warn:#b3471a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e181d;--surface:#16242b;--ink:#e4edef;--sub:#8ea2aa;--line:#2b3d45;--accent:#5fb7c9;--on-accent:#0b1a20;--warn:#f0a15f}}
+:root[data-theme="dark"]{--bg:#0e181d;--surface:#16242b;--ink:#e4edef;--sub:#8ea2aa;--line:#2b3d45;--accent:#5fb7c9;--on-accent:#0b1a20;--warn:#f0a15f}
+main{padding:20px 20px 40px}
+.notice{font-size:12px;margin-bottom:20px}
+.seg{gap:0;margin-bottom:6px}
+.seg button{flex:none;background:none;border:0;border-bottom:2px solid transparent;border-radius:0;padding:8px 0;margin-right:20px;color:var(--sub);font-weight:500}
+.seg button[aria-pressed="true"]{background:none;color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+#dir button{font-size:18px}
+.seg.small button{padding:6px 0;font-size:13px;margin-right:16px}
+.hero{background:none;border:0;border-radius:0;border-top:1px solid var(--line);padding:22px 0 10px;margin:14px 0 0;text-align:left}
+.hero .lead{font-size:13px}
+.big{font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;font-size:112px;font-weight:500;letter-spacing:-.03em;line-height:1;color:var(--ink);margin:10px 0 0}
+.big small{font-size:26px;font-weight:500;letter-spacing:0;color:var(--sub);margin-left:6px}
+.hero.urgent .big{color:var(--warn)}
+.secs{font-size:17px;margin:6px 0 0}
+.dep{font-size:15px;font-weight:600;margin:18px 0 0;padding-left:12px;border-left:3px solid var(--accent)}
+h2{font-size:13px;margin:30px 0 12px}
+ul{background:none;border:0;border-radius:0;border-left:1px solid var(--line);margin:0 0 0 5px}
+li{position:relative;padding:4px 0 4px 18px;gap:12px;align-items:baseline;font-size:15px}
+li+li{border-top:0}
+li::before{content:"";position:absolute;left:-4px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--bg);border:1.5px solid var(--sub)}
+li:first-child::before{background:var(--accent);border-color:var(--accent)}
+li span:last-child{white-space:nowrap}
+.secs{display:none}
+.big{font-size:96px;white-space:nowrap}
+.big small{margin-right:8px}
+.foot{font-size:12px;color:var(--sub);border-top:1px solid var(--line);margin:40px 0 0;padding-top:16px}
+.foot a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+<p class="notice" id="notice"></p>
+<div class="seg" id="dir"></div>
+<div class="seg small" id="kind"></div>
+<section class="hero" id="hero" aria-live="polite">
+<p class="lead" id="lead"></p>
+<p class="big" id="min"></p>
+<p class="secs" id="sec"></p>
+<p class="dep" id="dep"></p>
+</section>
+<h2>そのあとの便</h2>
+<ul id="next"></ul>
+<h2>時刻表の種類</h2>
+<div class="seg small" id="day"></div>
+<p class="foot">不具合や時刻の間違いなどがあれば、Instagram <a href="https://www.instagram.com/sru555555/" target="_blank" rel="noopener">@sru555555</a> までご連絡お願いします。</p>
+</main>
+<script>
+// 時刻は「0時からの分」。type は 通常 / 直行、ride は所要分(着時刻 = 発 + ride)。公式時刻表の値に差し替えてください
+function gen(a,b,s,type,ride){var r=[];for(var t=a;t<=b;t+=s)r.push({t:t,type:type,ride:ride});return r;}
+function mix(){var r=[].concat.apply([],arguments);r.sort(function(x,y){return x.t-y.t});return r;}
+// 公式 平日ダイヤ(南草津駅東口発 2026.9.28改正)。キー=時、値=分。ride は所要分の目安
+function parse(o,type,via,fn){var r=[];Object.keys(o).forEach(function(h){o[h].split(" ").forEach(function(m){var t=Number(h)*60+Number(m);r.push({t:t,type:type,via:via,ride:fn(t)});});});return r;}
+function R15(){return 15;}
+function rideKaga(t){return t>=480&&t<540?18:15;}
+function rideWest(t){return t>=480&&t<540?23:20;}
+function rideEast(t){if(t===477)return 15;if(t>=440&&t<=530)return 18;if(t>=1260)return 12;return 15;}
+var REAL=mix(
+ parse({7:"30 40 45 52 57",8:"00 05 10 16 16 20 23 23 25 27 30 33 37 40 45 50",9:"02 12 20 25 30 33 40 43 49 53 58",10:"01 04 09 12 15 18 21 24 29 37 40 47 52",11:"02 17 22 32 37 52",12:"02 12 17 22 28 32 37 47 52",13:"17 22 37 52",14:"30",15:"52"},"直行","シャトル",R15),
+ parse({8:"05 20 37",9:"07 20 41",10:"09 24 52",11:"22 52",12:"22 52",13:"22 52",14:"37 52",15:"17",16:"18"},"通常","かがやき通り経由",rideKaga),
+ parse({8:"01 30",9:"02",10:"04",11:"02 37",12:"02 37",13:"02 37",14:"02 22",15:"22",16:"22",17:"24",18:"24",19:"24",20:"24",21:"24"},"通常","パナソニック西口経由",rideWest),
+ parse({6:"57",7:"27 44 57",8:"16 33 45",9:"12 30",10:"19 38",11:"17",15:"02 37 52",16:"03 37 54",17:"09 39 54",18:"09 39 54",19:"09 54",20:"09 54",21:"09"},"通常","パナソニック東口経由",rideEast),
+ parse({8:"55",9:"20 55",10:"24 52",11:"22 52",12:"22 52",13:"22 52",14:"52"},"通常","福祉センター行(立命館大学経由)",R8)
+);
+// BKC→南草津駅 平日開講ダイヤ(2026.9.28改正)。赤い注: 廃止・草津駅/瀬田駅行きは含めていません
+function peak(t){return t>=1020&&t<1140;}
+function rideKagaS(t){return peak(t)?18:15;}
+function rideWestS(t){return t>=960&&t<1140?24:20;}
+function rideEastS(t){return peak(t)?18:15;}
+var REAL_STN=mix(
+ parse({10:"50",11:"30 50 55",12:"25 40 45 55",13:"10 30 50",14:"00 10 30 50 55",15:"05 10 15 30 45",16:"00 10 20 25 30 35 38 43 46 50 55",17:"00 15 30 40 55",18:"05 25 35 45 50 55",19:"05 15 25 40",20:"00 10 45"},"直行","シャトル",R15),
+ parse({9:"25",10:"00 25",11:"00 30",12:"00 30",13:"00 30",14:"00 30",15:"00 30",16:"00 30",17:"00 30",18:"00 30",19:"00",20:"00 30",21:"00"},"通常","かがやき通り経由",rideKagaS),
+ parse({9:"45",10:"45",11:"45",12:"45",13:"45",14:"55",15:"45",16:"45",17:"10 25 40 55",18:"10 25 40 55",19:"10 25 40 55",20:"10 25 40 55",21:"10 25 40",22:"00"},"通常","パナソニック西口経由",rideWestS),
+ parse({7:"00 15",8:"05 35",9:"05 35",10:"05 35",11:"05 20 35",12:"05 20 35",13:"05 20 35",14:"05 20 35",15:"05 20 35",16:"05 35 50",17:"05 20 35 50",18:"05 20 35",19:"05 20 35 50",20:"05 20 50",21:"50",22:"40"},"通常","パナソニック東口経由",rideEastS)
+);
+// 休講日(平日): シャトル全便運休。南草津駅→BKCは8:10・8:55にパナソニック東口のみ停車の連節便が追加
+function R8(){return 8;}
+function noShuttle(a){return a.filter(function(b){return b.type!=="直行";});}
+var REST_STN=noShuttle(REAL_STN);
+var REST_BKC=mix(noShuttle(REAL),[{t:490,type:"通常",via:"パナソニック東口経由(連節)",ride:rideEast(490)},{t:535,type:"通常",via:"パナソニック東口経由(連節)",ride:rideEast(535)}]);
+var TT={
+  toBKC:{label:"南草津駅 → BKC",
+    開講日:REAL,
+    土日祝:mix(gen(480,1140,20,"通常",15)),
+    休講日:REST_BKC},
+  toStn:{label:"BKC → 南草津駅",
+    開講日:REAL_STN,
+    土日祝:mix(gen(490,1150,20,"通常",15)),
+    休講日:REST_STN}
+};
+var DAYS=["開講日","休講日","土日祝"];
+var dir="toBKC",kind="全て";
+var d0=new Date().getDay();
+var ymd=new Date().getFullYear()*10000+(new Date().getMonth()+1)*100+new Date().getDate();
+function inR(a,b){return ymd>=a&&ymd<=b;}
+var day=(d0===0||d0===6)?"土日祝":(inR(20260928,20261225)||inR(20270106,20270122))?"開講日":"休講日";
+
+function label(b){return b.via||b.type;}
+function hhmm(t){var h=Math.floor(t/60),m=t%60;return h+":"+(m<10?"0":"")+m;}
+function mkSeg(id,items,get,set){
+  var el=document.getElementById(id);el.innerHTML="";
+  items.forEach(function(it){
+    var b=document.createElement("button");
+    b.textContent=it.label;
+    b.setAttribute("aria-pressed",String(get()===it.key));
+    b.onclick=function(){set(it.key);render();};
+    el.appendChild(b);
+  });
+}
+function render(){
+  mkSeg("dir",[{key:"toBKC",label:TT.toBKC.label},{key:"toStn",label:TT.toStn.label}],function(){return dir},function(k){dir=k});
+  mkSeg("kind",["全て","直行","通常"].map(function(k){return{key:k,label:k=="全て"?"全て":k=="直行"?"直行シャトル":"通常便"}}),function(){return kind},function(k){kind=k});
+  mkSeg("day",DAYS.map(function(d){return{key:d,label:d}}),function(){return day},function(k){day=k});
+  tick();
+}
+function tick(){
+  var real=day!=="土日祝";
+  document.getElementById("notice").textContent=real?"発車時刻は公式の"+day+"ダイヤ(平日)です。到着時刻は所要時間からの目安です。":"この組み合わせの時刻はまだサンプルです。実際の発車時刻とは異なります。";
+  var n=new Date(),now=n.getHours()*3600+n.getMinutes()*60+n.getSeconds();
+  var list=TT[dir][day].filter(function(b){return kind==="全て"||b.type===kind});
+  var dest=dir==="toBKC"?"BKC":"南草津駅";
+  var idx=-1;
+  for(var i=0;i<list.length;i++){if(list[i].t*60>=now){idx=i;break;}}
+  var hero=document.getElementById("hero");
+  var nx=document.getElementById("next");nx.innerHTML="";
+  if(idx<0){
+    document.getElementById("lead").textContent=list.length?"本日の運行は終了しました":"この日・この種類の運行はありません";
+    document.getElementById("min").textContent="–";
+    document.getElementById("sec").textContent="";
+    document.getElementById("dep").textContent=list.length?"明日の始発 "+hhmm(list[0].t):"";
+    hero.classList.remove("urgent");
+    return;
+  }
+  var b0=list[idx],diff=b0.t*60-now;
+  var m=Math.floor(diff/60),s=diff%60;
+  document.getElementById("lead").textContent="次のバスが出るまで";
+  document.getElementById("min").innerHTML=m+"<small>分</small>"+(s<10?"0":"")+s+"<small>秒</small>";
+  document.getElementById("sec").textContent=(s<10?"0":"")+s+"秒";
+  document.getElementById("dep").textContent=label(b0)+" "+hhmm(b0.t)+" 発 → "+dest+" 約"+hhmm(b0.t+b0.ride)+" 着";
+  hero.classList.toggle("urgent",diff<180);
+  var prev=b0.t;
+  list.slice(idx+1,idx+5).forEach(function(x){
+    var li=document.createElement("li");
+    li.style.marginTop=Math.min((x.t-prev)*3,54)+"px";prev=x.t;var a=document.createElement("span");a.textContent=label(x)+" "+hhmm(x.t)+" 発 → 約"+hhmm(x.t+x.ride)+" 着";
+    var b=document.createElement("span");b.textContent="あと"+Math.floor((x.t*60-now)/60)+"分";
+    li.appendChild(a);li.appendChild(b);nx.appendChild(li);
+  });
+  if(!nx.children.length){var li=document.createElement("li");li.textContent="この便が最終です";nx.appendChild(li);}
+}
+render();
+setInterval(tick,1000);
+</script>
+</body>
+</html>
